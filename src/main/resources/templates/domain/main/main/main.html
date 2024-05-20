@@ -6,25 +6,95 @@
     <title>Main Page - ClearPath</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .main-message {
-            text-align: center;
-            margin-top: 100px;
-            font-size: 24px;
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            position: absolute;
+            top: 56px; /* 헤더의 높이와 동일하게 설정 */
+            bottom: 0;
+            left: 0;
+            right: 0;
         }
     </style>
 </head>
 <body>
 <div th:replace="global/header :: header"></div>
 
-<div class="container">
-    <div class="main-message">
-        메인 페이지입니다.
-    </div>
-</div>
+<div id="map"></div>
 
 <!-- 부트스트랩 자바스크립트 추가 -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapsApiKey}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
+    if (navigator.geolocation) {
+        // GeoLocation을 이용해서 접속 위치를 얻어옵니다
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var lat = position.coords.latitude, // 위도
+                lon = position.coords.longitude; // 경도
+
+            var locPosition = new kakao.maps.LatLng(lat, lon); // 지도의 중심 좌표를 geolocation으로 얻어온 좌표로 생성합니다
+
+            var mapContainer = document.getElementById('map'); // 지도를 표시할 div
+            var mapOption = {
+                center: locPosition, // geolocation으로 얻어온 좌표를 중심 좌표로 설정합니다
+                level: 5 // 지도의 확대 레벨 (값이 높을수록 가까워집니다)
+            };
+
+            var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+
+            // 마커를 생성합니다
+            var marker = new kakao.maps.Marker({
+                map: map,
+                position: locPosition
+            });
+
+            // 인포윈도우를 생성합니다
+            var infowindow = new kakao.maps.InfoWindow({
+                content : '<div style="padding:5px; font-size: 12px;">현재 위치</div>',
+                removable : true
+            });
+
+            // 인포윈도우를 마커 위에 표시합니다
+            infowindow.open(map, marker);
+
+            // 지도 중심좌표를 접속위치로 변경합니다
+            map.setCenter(locPosition);
+        });
+    } else { // HTML5의 GeoLocation을 사용할 수 없을 때 기본 중심 좌표 사용
+        var locPosition = new kakao.maps.LatLng(33.450701, 126.570667);
+
+        var mapContainer = document.getElementById('map'); // 지도를 표시할 div
+        var mapOption = {
+            center: locPosition, // 기본 중심 좌표로 설정합니다
+            level: 5 // 지도의 확대 레벨 (값이 높을수록 가까워집니다)
+        };
+
+        var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+
+        // 마커를 생성합니다
+        var marker = new kakao.maps.Marker({
+            map: map,
+            position: locPosition
+        });
+
+        // 인포윈도우를 생성합니다
+        var infowindow = new kakao.maps.InfoWindow({
+            content : '<div style="padding:5px; font-size: 12px;">geolocation을 사용할수 없어요..</div>',
+            removable : true
+        });
+
+        // 인포윈도우를 마커 위에 표시합니다
+        infowindow.open(map, marker);
+
+        map.setCenter(locPosition);
+    }
+    /*]]>*/
+</script>
 </body>
 </html>

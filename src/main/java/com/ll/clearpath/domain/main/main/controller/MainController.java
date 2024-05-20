@@ -15,12 +15,7 @@ public class MainController {
 
     @GetMapping("/")
     public String showMain(Model model){
-        return "domain/main/main/main";
-    }
-
-    @GetMapping("/map")
-    public String showMap(Model model){
         model.addAttribute("kakaoMapsApiKey", kakaoMapsApiKey);
-        return "domain/main/main/map";
+        return "domain/main/main/main";
     }
 }

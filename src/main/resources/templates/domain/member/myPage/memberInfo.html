@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 정보 - ClearPath</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 폰트 어썸 CSS 추가 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:replace="global/header :: header"></div>
+
+<div class="container mt-5">
+    <div class="card">
+        <h5 class="card-header">회원 정보</h5>
+        <div class="card-body">
+            <p class="card-text">
+                <label for="email">이메일:</label>
+                <input type="text" id="email" th:value="${memberInfoDto.email}" readonly>
+                <i class="fas fa-lock" title="수정 불가"></i>
+            </p>
+            <p class="card-text">
+                <label for="username">사용자 이름:</label>
+                <input type="text" id="username" th:value="${memberInfoDto.username}" readonly>
+                <i class="fas fa-lock" title="수정 불가"></i>
+            </p>
+            <p class="card-text">
+                <label for="nicknameDisplay">닉네임:</label>
+                <input type="text" id="nicknameDisplay" th:value="${memberInfoDto.nickname}" readonly>
+                <i class="fas fa-pencil-alt" title="수정 가능" style="cursor:pointer;" onclick="showNicknameEdit()"></i>
+            </p>
+            <div class="card-text row">
+                <div th:if="${not isSocialLogin}" class="col-md-auto">
+                    <button onclick="showPasswordEdit()" class="btn btn-secondary">비밀번호 수정</button>
+                </div>
+                <div class="col-md-auto ml-auto">
+                    <button id="deleteAccountBtn" class="btn btn-danger">회원 탈퇴</button>
+                    <form id="deleteAccountForm" th:action="@{/member/my-page/delete-account}" method="post" style="display: none;">
+                        <input type="hidden" name="_method" value="delete"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 부트스트랩 및 폰트 어썸 자바스크립트 -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function showNicknameEdit() {
+        window.location.href = '/member/my-page/update';
+    }
+    function showPasswordEdit() {
+        window.location.href = '/member/my-page/update-password';
+    }
+
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+        const isConfirmed = confirm('정말로 회원 탈퇴하시겠습니까?');
+        if (isConfirmed) {
+            document.getElementById('deleteAccountForm').submit();
+        }
+    });
+</script>
+</body>
+</html>

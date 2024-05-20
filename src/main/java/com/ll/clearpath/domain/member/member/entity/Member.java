@@ -1,12 +1,18 @@
 package com.ll.clearpath.domain.member.member.entity;
 
+import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberNicknameDto;
 import com.ll.clearpath.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor(access = PROTECTED)
 @Builder
 @Getter
 public class Member extends BaseEntity {
@@ -23,4 +29,15 @@ public class Member extends BaseEntity {
 
     @Column(unique = true)
     private String nickname;
+
+    private String providerId;
+
+    public void updateMemberNickname(UpdateMemberNicknameDto updateMemberNicknameDto){
+        this.nickname = updateMemberNicknameDto.getNickname();
+    }
+
+    public void updateMemberPassword(String newPassword){
+        this.password = newPassword;
+    }
+
 }

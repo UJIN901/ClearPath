@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 정보 수정 - ClearPath</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        .error-message {
+            color: red;
+        }
+        .nickname-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .nickname-row input {
+            margin-left: 10px;
+            margin-right: 10px;
+            width: auto;
+            flex-grow: 1;
+            max-width: 250px; /* 너비를 조금 더 줄임 */
+            height: calc(1.5em + 0.75rem + 2px); /* 높이를 부트스트랩 input 기본 높이로 설정 */
+        }
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        .btn-custom {
+            width: 100px; /* 버튼 너비를 더 넓게 설정 */
+            height: 38px; /* 일반적인 버튼 높이 */
+        }
+    </style>
+</head>
+<body>
+<div th:replace="global/header :: header"></div>
+
+<div class="container mt-5">
+    <div class="card">
+        <h5 class="card-header">회원 정보 수정</h5>
+        <div class="card-body">
+            <p class="card-text">
+                이메일: <span th:text="${memberInfoDto?.email}">이메일</span>
+                <i class="fas fa-lock" title="수정 불가"></i>
+            </p>
+            <p class="card-text">
+                사용자 이름: <span th:text="${memberInfoDto?.username}">사용자 이름</span>
+                <i class="fas fa-lock" title="수정 불가"></i>
+            </p>
+            <form th:action="@{/member/my-page/update}" th:object="${updateMemberNicknameDto}" method="POST">
+                <input type="hidden" name="_method" value="put"/>
+                <div class="nickname-row">
+                    <label for="nickname">닉네임:</label>
+                    <input type="text" id="nickname" name="nickname" th:field="*{nickname}" class="form-control" required>
+                    <button type="submit" class="btn btn-primary btn-custom">저장</button>
+                </div>
+                <div class="error-message" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}">닉네임 오류</div>
+                <div class="button-row">
+                    <div></div> <!-- 빈 div로 좌측 정렬 유지 -->
+                    <button type="button" class="btn btn-secondary btn-custom" onclick="window.location.href='/member/my-page'">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 및 Font Awesome JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

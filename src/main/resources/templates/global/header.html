@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClearPath</title>
+    <!-- 부트스트랩 링크 추가 -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 추가적인 CSS -->
+    <style>
+        /* 추가적인 스타일이 필요하다면 여기에 작성하세요 */
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="/">ClearPath</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <!-- 마이페이지는 로그인 상태에서만 접근 가능하도록 -->
+                <li class="nav-item">
+                    <a class="nav-link" sec:authorize="isAuthenticated()" href="/member/my-page">마이페이지</a>
+                </li>
+                <!-- 로그인/로그아웃 상태에 따라 표시되는 메뉴 -->
+                <li class="nav-item">
+                    <a class="nav-link" sec:authorize="isAuthenticated()" href="/member/logout">로그아웃</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" sec:authorize="!isAuthenticated()" href="/member/login">로그인</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<!-- 내용 -->
+
+<!-- 부트스트랩 자바스크립트 추가 -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

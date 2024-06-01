@@ -5,96 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page - ClearPath</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,700" rel="stylesheet">
     <style>
         body, html {
             height: 100%;
             margin: 0;
+            background: linear-gradient(to bottom, #514A9D, #24C6DC);
         }
         #map {
             position: absolute;
-            top: 56px; /* 헤더의 높이와 동일하게 설정 */
+            top: 56px;
+            bottom: 0;
+            right: 0;
+            left: 25%;
+        }
+        .header {
+            height: 56px;
+        }
+        .sidebar {
+            position: absolute;
+            top: 56px;
             bottom: 0;
             left: 0;
-            right: 0;
+            width: 25%;
+            background: #fff;
+            overflow-y: scroll;
+            box-shadow: 10px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .search-section {
+            flex: 0 0 33%;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .sidebar .results-section {
+            flex: 1 1 67%;
+            overflow-y: auto;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
 <div th:replace="global/header :: header"></div>
 
+<div class="sidebar">
+    <div class="search-section">
+        <h5>조건 검색</h5>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select class="form-control" id="category" name="category">
+                    <option value="all" selected>All</option>
+                    <option value="title">Title</option>
+                    <option value="keyword">Keyword</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search">Search</label>
+                <input type="text" class="form-control" id="search" name="search" placeholder="Enter search term">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    <div class="results-section">
+        <h5>Search Results</h5>
+        <ul class="list-group">
+            <li class="list-group-item">Tourist Spot 1</li>
+            <li class="list-group-item">Tourist Spot 2</li>
+            <li class="list-group-item">Tourist Spot 3</li>
+            <li class="list-group-item">Tourist Spot 4</li>
+            <li class="list-group-item">Tourist Spot 5</li>
+            <li class="list-group-item">Tourist Spot 6</li>
+            <li class="list-group-item">Tourist Spot 7</li>
+            <li class="list-group-item">Tourist Spot 8</li>
+            <li class="list-group-item">Tourist Spot 9</li>
+            <li class="list-group-item">Tourist Spot 10</li>
+        </ul>
+    </div>
+</div>
+
 <div id="map"></div>
 
-<!-- 부트스트랩 자바스크립트 추가 -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script type="text/javascript" th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapsApiKey}"></script>
+<script th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapsApiKey} + '&libraries=clusterer'"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
-    // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
-    if (navigator.geolocation) {
-        // GeoLocation을 이용해서 접속 위치를 얻어옵니다
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var lat = position.coords.latitude, // 위도
-                lon = position.coords.longitude; // 경도
+    function processTourData(tourlist, clusterer, map) {
+        let batchSize = 100;
+        let index = 0;
+        let markers = [];
+        let infoWindows = [];
 
-            var locPosition = new kakao.maps.LatLng(lat, lon); // 지도의 중심 좌표를 geolocation으로 얻어온 좌표로 생성합니다
+        function processBatch() {
+            if (index >= tourlist.length) {
+                clusterer.addMarkers(markers);
+                updateInfoWindows();
+                return;
+            }
 
-            var mapContainer = document.getElementById('map'); // 지도를 표시할 div
-            var mapOption = {
-                center: locPosition, // geolocation으로 얻어온 좌표를 중심 좌표로 설정합니다
-                level: 5 // 지도의 확대 레벨 (값이 높을수록 가까워집니다)
-            };
+            for (let i = 0; i < batchSize && index < tourlist.length; i++, index++) {
+                let tour = tourlist[index];
+                let tourPosition = new kakao.maps.LatLng(tour.latitude, tour.longitude);
+                let tourMarker = new kakao.maps.Marker({
+                    position: tourPosition,
+                    title: tour.title
+                });
 
-            var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+                let tourInfoWindow = new kakao.maps.InfoWindow({
+                    content: '<div style="padding:5px; font-size: 12px;">' + tour.title + '</div>',
+                    removable: true
+                });
 
-            // 마커를 생성합니다
-            var marker = new kakao.maps.Marker({
-                map: map,
-                position: locPosition
+                kakao.maps.event.addListener(tourMarker, 'click', function () {
+                    tourInfoWindow.open(map, tourMarker);
+                });
+
+                markers.push(tourMarker);
+                infoWindows.push({ marker: tourMarker, infoWindow: tourInfoWindow });
+            }
+
+            setTimeout(processBatch, 100);
+        }
+
+        function updateInfoWindows() {
+            let bounds = map.getBounds();
+            let minLevel = clusterer.getMinLevel();
+            let currentLevel = map.getLevel();
+
+            infoWindows.forEach(function(item) {
+                if (bounds.contain(item.marker.getPosition()) && currentLevel >= minLevel) {
+                    item.infoWindow.close();
+                } else if (bounds.contain(item.marker.getPosition())) {
+                    item.infoWindow.open(map, item.marker);
+                } else {
+                    item.infoWindow.close();
+                }
             });
+        }
 
-            // 인포윈도우를 생성합니다
-            var infowindow = new kakao.maps.InfoWindow({
-                content : '<div style="padding:5px; font-size: 12px;">현재 위치</div>',
-                removable : true
-            });
+        processBatch();
 
-            // 인포윈도우를 마커 위에 표시합니다
-            infowindow.open(map, marker);
-
-            // 지도 중심좌표를 접속위치로 변경합니다
-            map.setCenter(locPosition);
+        kakao.maps.event.addListener(map, 'bounds_changed', function() {
+            updateInfoWindows();
         });
-    } else { // HTML5의 GeoLocation을 사용할 수 없을 때 기본 중심 좌표 사용
-        var locPosition = new kakao.maps.LatLng(33.450701, 126.570667);
 
-        var mapContainer = document.getElementById('map'); // 지도를 표시할 div
-        var mapOption = {
-            center: locPosition, // 기본 중심 좌표로 설정합니다
-            level: 5 // 지도의 확대 레벨 (값이 높을수록 가까워집니다)
+        kakao.maps.event.addListener(clusterer, 'clusterclick', function() {
+            infoWindows.forEach(function(item) {
+                item.infoWindow.close();
+            });
+        });
+    }
+
+    function initializeMap() {
+        let locPosition = new kakao.maps.LatLng(33.4996213, 126.5311884);
+
+        let mapContainer = document.getElementById('map');
+        let mapOption = {
+            center: locPosition,
+            level: 4,
+            draggable: true
         };
 
-        var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+        let map = new kakao.maps.Map(mapContainer, mapOption);
 
-        // 마커를 생성합니다
-        var marker = new kakao.maps.Marker({
+        let clusterer = new kakao.maps.MarkerClusterer({
+            map: map,
+            averageCenter: true,
+            minLevel: 6
+        });
+
+        let marker = new kakao.maps.Marker({
             map: map,
             position: locPosition
         });
 
-        // 인포윈도우를 생성합니다
-        var infowindow = new kakao.maps.InfoWindow({
-            content : '<div style="padding:5px; font-size: 12px;">geolocation을 사용할수 없어요..</div>',
-            removable : true
+        let infowindow = new kakao.maps.InfoWindow({
+            content: '<div style="padding:10px; font-size: 16px;">제주시청 위치</div>',
+            removable: true
         });
 
-        // 인포윈도우를 마커 위에 표시합니다
         infowindow.open(map, marker);
 
-        map.setCenter(locPosition);
+        let tourlist = /*[[${tourlist}]]*/ [];
+        processTourData(tourlist, clusterer, map);
     }
+
+    initializeMap();
     /*]]>*/
+</script>
+<script>
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const category = document.getElementById('category').value;
+        const searchTerm = document.getElementById('search').value;
+
+        fetch(`/api/tourlist/search?category=${category}&search=${searchTerm}`)
+            .then(response => response.json())
+            .then(data => {
+                const resultsSection = document.querySelector('.results-section ul');
+                resultsSection.innerHTML = '';  // 기존 목록을 비웁니다.
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.classList.add('list-group-item');
+                    li.textContent = item.title;
+                    resultsSection.appendChild(li);
+                });
+                initializeMap(data);  // 맵을 새 데이터로 초기화합니다.
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    function initializeMap(tourlist) {
+        let mapContainer = document.getElementById('map');
+        let mapOption = {
+            center: new kakao.maps.LatLng(33.4996213, 126.5311884),  // 지도의 중심 좌표
+            level: 4
+        };
+        let map = new kakao.maps.Map(mapBody, mapOption);
+
+        tourlist.forEach(tour => {
+            let position = new kakao.maps.LatLng(tour.latitude, tour.longitude);
+            let marker = new kakao.maps.Marker({
+                position: position,
+                title: tour.title
+            });
+            marker.setMap(map);
+
+            let infowindow = new kakao.maps.InfoWindow({
+                content: `<div style="padding:5px;">${tour.title}</div>`
+            });
+            kakao.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(map, marker);
+            });
+        });
+    }
+
 </script>
 </body>
 </html>

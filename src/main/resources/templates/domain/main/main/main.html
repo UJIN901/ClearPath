@@ -45,15 +45,70 @@
             overflow-y: auto;
             padding: 10px;
         }
+        .list-group {
+            min-width: max-content;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .list-group-item {
+            white-space: nowrap;
+        }
+        .distance {
+            font-size: 0.9em;
+            font-weight: bold;
+            font-style: italic;
+            margin-right: 5px;
+        }
+        .address {
+            font-size: 0.9em;
+        }
+        .tags {
+            margin-top: 5px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            padding: 2px 8px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.8em;
+        }
+        .move-button {
+            margin-left: 10px;
+        }
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            font-size: 2em;
+            color: white;
+        }
     </style>
 </head>
 <body>
 <div th:replace="global/header :: header"></div>
 
+<div class="loading">Loading...</div>
+
 <div class="sidebar">
     <div class="search-section">
         <h5>조건 검색</h5>
         <form id="searchForm">
+            <div class="form-group">
+                <label for="radius">Radius</label>
+                <select class="form-control" id="radius" name="radius">
+                    <option value="all">All</option>
+                    <option value="3" selected>3 km</option>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                    <option value="30">30 km</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label for="category">Category</label>
                 <select class="form-control" id="category" name="category">
@@ -72,16 +127,23 @@
     <div class="results-section">
         <h5>Search Results</h5>
         <ul class="list-group">
-            <li class="list-group-item">Tourist Spot 1</li>
-            <li class="list-group-item">Tourist Spot 2</li>
-            <li class="list-group-item">Tourist Spot 3</li>
-            <li class="list-group-item">Tourist Spot 4</li>
-            <li class="list-group-item">Tourist Spot 5</li>
-            <li class="list-group-item">Tourist Spot 6</li>
-            <li class="list-group-item">Tourist Spot 7</li>
-            <li class="list-group-item">Tourist Spot 8</li>
-            <li class="list-group-item">Tourist Spot 9</li>
-            <li class="list-group-item">Tourist Spot 10</li>
+            <li th:each="tour : ${tourlist}" class="list-group-item">
+                <div>
+                    <h5>
+                        <span th:text="${tour.title}"></span>
+                        <button class="btn btn-sm btn-outline-primary move-button" th:onclick="'moveToLocation(' + ${tour.latitude} + ',' + ${tour.longitude} + ')'">이동</button>
+                    </h5>
+                </div>
+                <div>
+                    <p>
+                        <span class="distance" th:text="${#numbers.formatDecimal(tour.distance, 1, 1)} + 'km'"></span>
+                        <span class="address" th:text="${tour.address}"></span>
+                    </p>
+                    <p class="tags">
+                        <span th:each="tag : ${tour.tag.split(',')}" class="tag" th:text="${tag}"></span>
+                    </p>
+                </div>
+            </li>
         </ul>
     </div>
 </div>
@@ -94,7 +156,10 @@
 <script th:src="'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoMapsApiKey} + '&libraries=clusterer'"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
-    function processTourData(tourlist, clusterer, map) {
+    let map;
+    let clusterer;
+
+    function processTourData(tourlist) {
         let batchSize = 100;
         let index = 0;
         let markers = [];
@@ -166,16 +231,16 @@
         let mapContainer = document.getElementById('map');
         let mapOption = {
             center: locPosition,
-            level: 4,
+            level: 3,
             draggable: true
         };
 
-        let map = new kakao.maps.Map(mapContainer, mapOption);
+        map = new kakao.maps.Map(mapContainer, mapOption);
 
-        let clusterer = new kakao.maps.MarkerClusterer({
+        clusterer = new kakao.maps.MarkerClusterer({
             map: map,
             averageCenter: true,
-            minLevel: 6
+            minLevel: 5
         });
 
         let marker = new kakao.maps.Marker({
@@ -189,21 +254,26 @@
         });
 
         infowindow.open(map, marker);
-
-        let tourlist = /*[[${tourlist}]]*/ [];
-        processTourData(tourlist, clusterer, map);
     }
 
-    initializeMap();
-    /*]]>*/
-</script>
-<script>
+    function moveToLocation(lat, lng) {
+        let moveLatLon = new kakao.maps.LatLng(lat, lng);
+        map.setCenter(moveLatLon);
+
+        setTimeout(() => {
+            $('.loading').hide();
+        }, 500); // Adjust the timeout as needed
+    }
+
     document.getElementById('searchForm').addEventListener('submit', function(event) {
         event.preventDefault();
         const category = document.getElementById('category').value;
         const searchTerm = document.getElementById('search').value;
+        const radius = document.getElementById('radius').value;
 
-        fetch(`/api/tourlist/search?category=${category}&search=${searchTerm}`)
+        $('.loading').show();
+
+        fetch(`/api/tourlist/search?category=${category}&search=${searchTerm}&radius=${radius}`)
             .then(response => response.json())
             .then(data => {
                 const resultsSection = document.querySelector('.results-section ul');
@@ -211,39 +281,24 @@
                 data.forEach(item => {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item');
-                    li.textContent = item.title;
+                    li.innerHTML = `<div><h5>${item.title} <button class="btn btn-sm btn-outline-primary move-button" onclick="moveToLocation(${item.latitude}, ${item.longitude})">이동</button></h5></div><p><span class="distance">${item.distance.toFixed(1)} km</span><span class="address">${item.address}</span></p><p class="tags">${item.tag.split(',').map(tag => `<span class="tag">${tag}</span>`).join('')}</p>`;
                     resultsSection.appendChild(li);
                 });
-                initializeMap(data);  // 맵을 새 데이터로 초기화합니다.
+                processTourData(data);  // 기존 맵 상태를 유지하면서 데이터를 처리합니다.
+                $('.loading').hide();
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                $('.loading').hide();
+            });
     });
 
-    function initializeMap(tourlist) {
-        let mapContainer = document.getElementById('map');
-        let mapOption = {
-            center: new kakao.maps.LatLng(33.4996213, 126.5311884),  // 지도의 중심 좌표
-            level: 4
-        };
-        let map = new kakao.maps.Map(mapBody, mapOption);
-
-        tourlist.forEach(tour => {
-            let position = new kakao.maps.LatLng(tour.latitude, tour.longitude);
-            let marker = new kakao.maps.Marker({
-                position: position,
-                title: tour.title
-            });
-            marker.setMap(map);
-
-            let infowindow = new kakao.maps.InfoWindow({
-                content: `<div style="padding:5px;">${tour.title}</div>`
-            });
-            kakao.maps.event.addListener(marker, 'click', function() {
-                infowindow.open(map, marker);
-            });
-        });
-    }
-
+    document.addEventListener('DOMContentLoaded', function() {
+        const tourlist = /*[[${tourlist}]]*/ [];
+        initializeMap();
+        processTourData(tourlist);
+    });
+    /*]]>*/
 </script>
 </body>
 </html>

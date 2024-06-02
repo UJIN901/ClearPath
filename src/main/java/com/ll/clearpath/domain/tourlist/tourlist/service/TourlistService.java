@@ -1,6 +1,7 @@
 package com.ll.clearpath.domain.tourlist.tourlist.service;
 
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistDetailDto;
+import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistMapDto;
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistRequestDto;
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistResponseDto;
 import com.ll.clearpath.domain.tourlist.tourlist.entity.Keyword;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,9 @@ public class TourlistService {
     private final TourlistRepository tourlistRepository;
     private final KeywordRepository keywordRepository;
     private final KeywordListRepository keywordListRepository;
+
+    private static final double JEJU_CITY_HALL_LATITUDE = 33.499621;
+    private static final double JEJU_CITY_HALL_LONGITUDE = 126.531188;
 
     @Transactional
     public void save(TourlistRequestDto tourlistRequestDto) {
@@ -111,26 +116,53 @@ public class TourlistService {
                 .build();
     }
 
-    public List<TourlistDetailDto> getAllTourlist() {
-        List<Tourlist> tourlists = tourlistRepository.findAll();
-        return tourlists.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-
-    public TourlistDetailDto convertToDto(Tourlist tourlist) {
+    public TourlistMapDto convertToDto(Tourlist tourlist) {
         String tags = tourlist.getKeywordLists().stream()
                 .map(keywordList -> keywordList.getKeyword().getContent())
                 .collect(Collectors.joining(", "));
 
-        return new TourlistDetailDto(
+        double distance = calculateDistance(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE, tourlist.getLatitude(), tourlist.getLongitude());
+
+        return new TourlistMapDto(
                 tourlist.getTitle(),
-                tourlist.getAddress(),
-                tags,
-                tourlist.getIntroduction(),
                 tourlist.getLatitude(),
                 tourlist.getLongitude(),
-                tourlist.getImgpath()
+                distance,
+                tourlist.getAddress(),
+                tags
         );
+    }
+
+    public List<TourlistMapDto> getAllTourlistForMap() {
+        List<Tourlist> tourlists = tourlistRepository.findAll();
+        return  tourlists.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of the earth in km
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c; // convert to kilometers
+
+        // 소수점 이하 첫 번째 자리까지 반올림
+        distance = Math.round(distance * 10) / 10.0;
+
+        return distance;
+    }
+
+    public List<TourlistMapDto> getTourlistByDistance(double radius) {
+        List<Tourlist> tourlists = tourlistRepository.findAll();
+        return tourlists.stream()
+                .map(this::convertToDto)
+                .filter(dto -> radius <= 0 || dto.getDistance() <= radius)
+                .sorted(Comparator.comparingDouble(TourlistMapDto::getDistance))
+                .collect(Collectors.toList());
     }
 }

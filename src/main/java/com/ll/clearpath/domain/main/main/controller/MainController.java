@@ -1,6 +1,6 @@
 package com.ll.clearpath.domain.main.main.controller;
 
-import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistDetailDto;
+import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistMapDto;
 import com.ll.clearpath.domain.tourlist.tourlist.service.TourlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +23,9 @@ public class MainController {
     public String showMain(Model model){
         model.addAttribute("kakaoMapsApiKey", kakaoMapsApiKey);
 
-        List<TourlistDetailDto> tourlist = tourlistService.getAllTourlist();
+        double defaultRadius = 3.0;
+        List<TourlistMapDto> tourlist = tourlistService.getTourlistByDistance(defaultRadius);
+//        List<TourlistMapDto> tourlist = tourlistService.getAllTourlistForMap();
         model.addAttribute("tourlist", tourlist);
         return "domain/main/main/main";
     }

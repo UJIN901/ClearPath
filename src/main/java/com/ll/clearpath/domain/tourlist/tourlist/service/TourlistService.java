@@ -107,6 +107,7 @@ public class TourlistService {
                 .introduction(tourlistDetailDto.getIntroduction())
                 .latitude(tourlistDetailDto.getLatitude())
                 .longitude(tourlistDetailDto.getLongitude())
+                .imgpath(tourlistDetailDto.getImgpath())
                 .build();
     }
 
@@ -128,7 +129,8 @@ public class TourlistService {
                 tags,
                 tourlist.getIntroduction(),
                 tourlist.getLatitude(),
-                tourlist.getLongitude()
+                tourlist.getLongitude(),
+                tourlist.getImgpath()
         );
     }
 }

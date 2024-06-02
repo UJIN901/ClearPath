@@ -31,6 +31,8 @@ public class Tourlist extends BaseEntity {
 
     private double longitude;
 
+    private String imgpath;
+
     @OneToMany(mappedBy = "tourlist", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<KeywordList> keywordLists;
 

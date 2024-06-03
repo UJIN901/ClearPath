@@ -161,6 +161,8 @@
     /*<![CDATA[*/
     let map;
     let clusterer;
+    const JEJU_CITY_HALL_LATITUDE = 33.4996213;
+    const JEJU_CITY_HALL_LONGITUDE = 126.5311884;
 
     function processTourData(tourlist) {
         let batchSize = 100;
@@ -229,7 +231,7 @@
     }
 
     function initializeMap() {
-        let locPosition = new kakao.maps.LatLng(33.4996213, 126.5311884);
+        let locPosition = new kakao.maps.LatLng(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE);
 
         let mapContainer = document.getElementById('map');
         let mapOption = {
@@ -279,6 +281,10 @@
         fetch(`/api/tourlist/search?category=${category}&search=${searchTerm}&radius=${radius}`)
             .then(response => response.json())
             .then(data => {
+                // 맵의 중심을 제주시청으로 변경
+                let locPosition = new kakao.maps.LatLng(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE);
+                map.setCenter(locPosition);
+
                 const resultsSection = document.querySelector('.results-section ul');
                 resultsSection.innerHTML = '';  // 기존 목록을 비웁니다.
                 data.forEach(item => {
@@ -295,8 +301,6 @@
                 $('.loading').hide();
             });
     });
-
-
 
     document.addEventListener('DOMContentLoaded', function() {
         const tourlist = /*[[${tourlist}]]*/ [];

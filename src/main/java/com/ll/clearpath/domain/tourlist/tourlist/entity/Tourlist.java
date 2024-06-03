@@ -1,5 +1,6 @@
 package com.ll.clearpath.domain.tourlist.tourlist.entity;
 
+import com.ll.clearpath.domain.weather.weather.dto.WeatherUpdateDto;
 import com.ll.clearpath.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,5 +36,14 @@ public class Tourlist extends BaseEntity {
 
     @OneToMany(mappedBy = "tourlist", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<KeywordList> keywordLists;
+
+    private double currentTemperature;
+
+    private String weatherCondition;
+
+    public void updateWeather(WeatherUpdateDto weatherUpdateDto){
+        this.currentTemperature = weatherUpdateDto.getCurrentTemperature();
+        this.weatherCondition = weatherUpdateDto.getWeatherCondition();
+    }
 
 }

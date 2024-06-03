@@ -20,4 +20,6 @@ public interface TourlistRepository extends JpaRepository<Tourlist, Long> {
     List<Tourlist> searchTours(
             @Param("category") String category,
             @Param("search") String search);
+
+    List<Tourlist> findTop1By();
 }

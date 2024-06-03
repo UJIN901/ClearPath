@@ -24,7 +24,7 @@ public class TourlistController {
     @Value("${maps.visitJeju.apiKey}")
     private String tourlistApiKey;
 
-    @GetMapping("/")
+    @GetMapping("")
     @ResponseBody
     public ResponseEntity<Void> connectTourlistOpenApi() {
 

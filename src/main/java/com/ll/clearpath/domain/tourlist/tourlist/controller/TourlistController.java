@@ -51,6 +51,10 @@ public class TourlistController {
         double radiusValue = "all".equalsIgnoreCase(radius) ? 0 : Double.parseDouble(radius);
         List<TourlistMapDto> result = tourlistService.searchTours(category, search, radiusValue);
 
+        if (result.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content 상태 코드 반환
+        }
+
         return ResponseEntity.ok(result); // 200 OK 상태 코드와 함께 결과 반환
     }
 }

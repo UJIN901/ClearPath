@@ -1,5 +1,6 @@
 package com.ll.clearpath.domain.tourlist.tourlist.controller;
 
+import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistMapDto;
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistRequestDto;
 import com.ll.clearpath.domain.tourlist.tourlist.service.TourlistService;
 import lombok.RequiredArgsConstructor;
@@ -8,17 +9,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
+@RequestMapping("/api/tourlist")
 public class TourlistController {
     private final TourlistService tourlistService;
 
     @Value("${maps.visitJeju.apiKey}")
     private String tourlistApiKey;
 
-    @GetMapping("/api/tourlist")
+    @GetMapping("/")
     @ResponseBody
     public ResponseEntity<Void> connectTourlistOpenApi() {
 
@@ -33,6 +39,18 @@ public class TourlistController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
 
+    @GetMapping("/search")
+    @ResponseBody
+    public ResponseEntity<List<TourlistMapDto>> searchTours(
+            @RequestParam String category,
+            @RequestParam String search,
+            @RequestParam String radius) {
+
+        double radiusValue = "all".equalsIgnoreCase(radius) ? 0 : Double.parseDouble(radius);
+        List<TourlistMapDto> result = tourlistService.searchTours(category, search, radiusValue);
+
+        return ResponseEntity.ok(result); // 200 OK 상태 코드와 함께 결과 반환
     }
 }

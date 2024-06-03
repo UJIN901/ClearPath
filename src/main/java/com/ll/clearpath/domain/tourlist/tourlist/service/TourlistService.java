@@ -165,4 +165,14 @@ public class TourlistService {
                 .sorted(Comparator.comparingDouble(TourlistMapDto::getDistance))
                 .collect(Collectors.toList());
     }
+
+    public List<TourlistMapDto> searchTours(String category, String search, double radius) {
+        List<Tourlist> tourlists = tourlistRepository.searchTours(category, search);
+
+        return tourlists.stream()
+                .map(this::convertToDto)
+                .filter(dto -> radius <= 0 || dto.getDistance() <= radius)
+                .sorted(Comparator.comparingDouble(TourlistMapDto::getDistance))
+                .collect(Collectors.toList());
+    }
 }

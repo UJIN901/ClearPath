@@ -7,8 +7,10 @@ import com.ll.clearpath.domain.tourlist.tourlist.entity.Tourlist;
 import com.ll.clearpath.domain.tourlist.tourlist.repository.KeywordListRepository;
 import com.ll.clearpath.domain.tourlist.tourlist.repository.KeywordRepository;
 import com.ll.clearpath.domain.tourlist.tourlist.repository.TourlistRepository;
+import com.ll.clearpath.domain.tourlist.tourlist.specification.TourlistSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -168,7 +170,10 @@ public class TourlistService {
     }
 
     public List<TourlistMapDto> searchTours(String category, String search, double radius, String weather) {
-        List<Tourlist> tourlists = tourlistRepository.searchTours(category, search);
+        List<String> searches = Arrays.asList(search.split(","));
+
+        Specification<Tourlist> specification = TourlistSpecifications.searchByCategoryAndKeywords(category, searches);
+        List<Tourlist> tourlists = tourlistRepository.findAll(specification);
 
         String[] defaultWeatherConditions = {"맑음", "구름많음", "흐림", "흐리고 비", "눈"};
         List<String> weatherConditions = weather == null || weather.isEmpty()

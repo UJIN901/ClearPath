@@ -1,6 +1,7 @@
 package com.ll.clearpath.domain.member.myPage.controller;
 
 import com.ll.clearpath.domain.member.myPage.dto.MemberInfoDto;
+import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberInterestsDto;
 import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberNicknameDto;
 import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberPasswordDto;
 import com.ll.clearpath.domain.member.myPage.service.MyPageService;
@@ -59,6 +60,25 @@ public class MyPageController {
             return "domain/member/myPage/updateNickname";
         }
         myPageService.updateNickname(updateMemberNicknameDto, user.getId());
+        return "redirect:/member/my-page";
+    }
+
+    @GetMapping("/update-interests")
+    public String showUpdateInterests(@AuthenticationPrincipal CustomUserDetails user, Model model){
+        MemberInfoDto memberInfoDto = myPageService.getMemberInfo(user.getId());
+        model.addAttribute("memberInfoDto", memberInfoDto);
+        model.addAttribute("updateMemberInterestsDto", new UpdateMemberInterestsDto(memberInfoDto.getInterests()));
+        return "domain/member/myPage/updateInterests";
+    }
+
+    @PutMapping("/update-interests")
+    public String UpdateInterests(@AuthenticationPrincipal CustomUserDetails user, @Valid UpdateMemberInterestsDto updateMemberInterestsDto,  BindingResult bindingResult, Model model){
+        MemberInfoDto memberInfoDto = myPageService.getMemberInfo(user.getId());
+        if(bindingResult.hasErrors()){
+            model.addAttribute("memberInfoDto", memberInfoDto);
+            return "domain/member/myPage/updateInterests";
+        }
+        myPageService.updateInterests(updateMemberInterestsDto, user.getId());
         return "redirect:/member/my-page";
     }
 

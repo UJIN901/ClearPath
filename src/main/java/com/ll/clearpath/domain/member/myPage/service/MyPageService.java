@@ -3,6 +3,7 @@ package com.ll.clearpath.domain.member.myPage.service;
 import com.ll.clearpath.domain.member.member.entity.Member;
 import com.ll.clearpath.domain.member.member.repository.MemberRepository;
 import com.ll.clearpath.domain.member.myPage.dto.MemberInfoDto;
+import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberInterestsDto;
 import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberNicknameDto;
 import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberPasswordDto;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class MyPageService {
     public MemberInfoDto getMemberInfo(Long id) {
         Optional<Member> optionalMember = memberRepository.findById(id);
         Member member = optionalMember.get();
-        return new MemberInfoDto(member.getEmail(), member.getUsername(), member.getNickname());
+        return new MemberInfoDto(member.getEmail(), member.getUsername(), member.getNickname(), member.getInterests());
     }
 
     @Transactional
@@ -60,5 +61,11 @@ public class MyPageService {
     public boolean IsSocialLogin(Long id) {
         String social = memberRepository.findById(id).get().getProviderId();
         return social != null;
+    }
+
+    @Transactional
+    public void updateInterests(UpdateMemberInterestsDto updateMemberInterestsDto, Long id) {
+        Member member = memberRepository.findById(id).get();
+        member.updateMemberInterests(updateMemberInterestsDto);
     }
 }

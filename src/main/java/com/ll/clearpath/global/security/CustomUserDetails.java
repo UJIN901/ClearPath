@@ -58,6 +58,8 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         return member.getNickname();
     }
 
+    public String getInterests() { return member.getInterests(); }
+
     public Long getId() {return member.getId();}
 
     @Override

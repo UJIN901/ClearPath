@@ -44,6 +44,10 @@
                     <label for="nickname" class="form-label">닉네임</label>
                     <input type="text" class="form-control" id="nickname" name="nickname" th:field="*{nickname}" placeholder="닉네임을 입력하세요" required>
                 </div>
+                <div class="mb-3">
+                    <label for="interests" class="form-label">관심 키워드<small>(예시 : 힐링,휴식)</small></label>
+                    <input type="text" class="form-control" id="interests" name="interests" th:field="*{interests}" placeholder="관심 키워드를 입력하세요">
+                </div>
                 <button type="submit" class="btn btn-primary w-100">회원가입</button>
             </form>
         </div>

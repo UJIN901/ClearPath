@@ -25,6 +25,7 @@ public class MemberService {
                 .password(passwordEncoder.encode(memberRegisterDto.getPassword()))
                 .nickname(memberRegisterDto.getNickname())
                 .providerId(null)
+                .interests(memberRegisterDto.getInterests())
                 .build();
 
         memberRepository.save(member);
@@ -46,6 +47,7 @@ public class MemberService {
                 .password(null)
                 .nickname(uniqueNickname)
                 .providerId(providerId)
+                .interests(null)
                 .build();
 
         memberRepository.save(member);

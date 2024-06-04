@@ -1,5 +1,6 @@
 package com.ll.clearpath.domain.member.member.entity;
 
+import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberInterestsDto;
 import com.ll.clearpath.domain.member.myPage.dto.UpdateMemberNicknameDto;
 import com.ll.clearpath.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -32,12 +33,18 @@ public class Member extends BaseEntity {
 
     private String providerId;
 
+    private String interests;
+
     public void updateMemberNickname(UpdateMemberNicknameDto updateMemberNicknameDto){
         this.nickname = updateMemberNicknameDto.getNickname();
     }
 
     public void updateMemberPassword(String newPassword){
         this.password = newPassword;
+    }
+
+    public void updateMemberInterests(UpdateMemberInterestsDto updateMemberInterestsDto){
+        this.interests = updateMemberInterestsDto.getInterests();
     }
 
 }

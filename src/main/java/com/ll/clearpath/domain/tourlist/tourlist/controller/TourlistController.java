@@ -4,6 +4,7 @@ import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistMapDto;
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistRequestDto;
 import com.ll.clearpath.domain.tourlist.tourlist.service.TourlistService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/api/tourlist")
+@Slf4j
 public class TourlistController {
     private final TourlistService tourlistService;
 
@@ -44,12 +46,13 @@ public class TourlistController {
     @GetMapping("/search")
     @ResponseBody
     public ResponseEntity<List<TourlistMapDto>> searchTours(
-            @RequestParam String category,
-            @RequestParam String search,
-            @RequestParam String radius) {
+            @RequestParam(value = "category") String category,
+            @RequestParam(value = "search") String search,
+            @RequestParam(value = "radius") String radius,
+            @RequestParam(value = "weather") String weather) {
 
         double radiusValue = "all".equalsIgnoreCase(radius) ? 0 : Double.parseDouble(radius);
-        List<TourlistMapDto> result = tourlistService.searchTours(category, search, radiusValue);
+        List<TourlistMapDto> result = tourlistService.searchTours(category, search, radiusValue, weather);
 
         if (result.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204 No Content 상태 코드 반환

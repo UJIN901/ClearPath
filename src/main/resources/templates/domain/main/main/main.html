@@ -98,6 +98,12 @@
             vertical-align: middle;
             margin-right: 5px;
         }
+        .weather-icons {
+            height: 1.2em;
+            width: 1.2em;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -138,7 +144,7 @@
                     <div class="row" id="weather" name="weather">
                         <div class="col-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="맑음" id="weatherClear">
+                                <input class="form-check-input weather-checkbox" type="checkbox" value="맑음" id="weatherClear">
                                 <label class="form-check-label" for="weatherClear">
                                     <img src="/icons/sunny.png" alt="맑음" class="weather-icon"> 맑음
                                 </label>
@@ -146,7 +152,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="구름많음" id="weatherCloudy">
+                                <input class="form-check-input weather-checkbox" type="checkbox" value="구름많음" id="weatherCloudy">
                                 <label class="form-check-label" for="weatherCloudy">
                                     <img src="/icons/cloudy.png" alt="구름많음" class="weather-icon"> 구름많음
                                 </label>
@@ -154,7 +160,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="흐림" id="weatherOvercast">
+                                <input class="form-check-input weather-checkbox" type="checkbox" value="흐림" id="weatherOvercast">
                                 <label class="form-check-label" for="weatherOvercast">
                                     <img src="/icons/overcast.png" alt="흐림" class="weather-icon"> 흐림
                                 </label>
@@ -162,7 +168,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="흐리고 비" id="weatherRainy">
+                                <input class="form-check-input weather-checkbox" type="checkbox" value="흐리고 비" id="weatherRainy">
                                 <label class="form-check-label" for="weatherRainy">
                                     <img src="/icons/rain.png" alt="흐리고 비" class="weather-icon"> 흐리고 비
                                 </label>
@@ -170,7 +176,7 @@
                         </div>
                         <div class="col-6">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="눈" id="weatherSnowy">
+                                <input class="form-check-input weather-checkbox" type="checkbox" value="눈" id="weatherSnowy">
                                 <label class="form-check-label" for="weatherSnowy">
                                     <img src="/icons/snow.png" alt="눈" class="weather-icon"> 눈
                                 </label>
@@ -199,6 +205,17 @@
                     </p>
                     <p class="tags">
                         <span th:each="tag : ${tour.tag.split(',')}" class="tag" th:text="${tag}"></span>
+                    </p>
+                    <p class="weather-info" th:if="${tour.weatherCondition} != '알 수 없음'">
+                        <span th:if="${tour.weatherCondition != null}">
+                            <img th:src="'/icons/' + ${tour.weatherCondition == '맑음' ? 'sunny' :
+                                                     tour.weatherCondition == '구름많음' ? 'cloudy' :
+                                                     tour.weatherCondition == '흐림' ? 'overcast' :
+                                                     tour.weatherCondition == '흐리고 비' ? 'rain' :
+                                                     tour.weatherCondition == '눈' ? 'snow' : ''} + '.png'"
+                                 alt="weather icon" class="weather-icons">
+                        </span>
+                        <span th:if="${tour.currentTemperature != 0.0}" th:text="${tour.currentTemperature} + '°C'"></span>
                     </p>
                 </div>
             </li>
@@ -331,31 +348,61 @@
         const searchTerm = document.getElementById('search').value;
         const radius = document.getElementById('radius').value;
 
+        let weatherConditions = [];
+        document.querySelectorAll('.weather-checkbox:checked').forEach(function(checkbox) {
+            weatherConditions.push(checkbox.value);
+        });
+
         $('.loading').show();
 
-        fetch(`/api/tourlist/search?category=${category}&search=${searchTerm}&radius=${radius}`)
-            .then(response => response.json())
-            .then(data => {
-                // 맵의 중심을 제주시청으로 변경
-                let locPosition = new kakao.maps.LatLng(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE);
-                map.setCenter(locPosition);
-
-                const resultsSection = document.querySelector('.results-section ul');
-                resultsSection.innerHTML = '';  // 기존 목록을 비웁니다.
-                data.forEach(item => {
-                    const li = document.createElement('li');
-                    li.classList.add('list-group-item');
-                    li.innerHTML = `<div><h5>${item.title} <button class="btn btn-sm btn-outline-primary move-button" onclick="moveToLocation(${item.latitude}, ${item.longitude})">이동</button></h5></div><p><span class="distance">${item.distance.toFixed(1)} km</span><span class="address">${item.address}</span></p><p class="tags">${item.tag.split(',').map(tag => `<span class="tag">${tag}</span>`).join('')}</p>`;
-                    resultsSection.appendChild(li);
-                });
-                processTourData(data);  // 기존 맵 상태를 유지하면서 데이터를 처리합니다.
+        fetch(`/api/tourlist/search?category=${category}&search=${searchTerm}&radius=${radius}&weather=${weatherConditions.join(',')}`)
+            .then(response => {
                 $('.loading').hide();
+                if (response.status === 204) {
+                    const resultsSection = document.querySelector('.results-section ul');
+                    resultsSection.innerHTML = '<li class="list-group-item">조건에 해당하는 검색결과가 없습니다.</li>';
+                    return null;
+                } else if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(data => {
+                if (data) {
+                    // 맵의 중심을 제주시청으로 변경
+                    let locPosition = new kakao.maps.LatLng(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE);
+                    map.setCenter(locPosition);
+
+                    const resultsSection = document.querySelector('.results-section ul');
+                    resultsSection.innerHTML = '';  // 기존 목록을 비웁니다.
+                    data.forEach(item => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.innerHTML = `<div><h5>${item.title} <button class="btn btn-sm btn-outline-primary move-button" onclick="moveToLocation(${item.latitude}, ${item.longitude})">이동</button></h5></div><p><span class="distance">${item.distance.toFixed(1)} km</span><span class="address">${item.address}</span></p><p class="tags">${item.tag.split(',').map(tag => `<span class="tag">${tag}</span>`).join('')}</p>`;
+                        if(item.weatherCondition !== '알 수 없음') {
+                            li.innerHTML += `<p class="weather-info">
+                                        <img src="/icons/${item.weatherCondition == '맑음' ? 'sunny' :
+                                item.weatherCondition == '구름많음' ? 'cloudy' :
+                                    item.weatherCondition == '흐림' ? 'overcast' :
+                                        item.weatherCondition == '흐리고 비' ? 'rain' :
+                                            item.weatherCondition == '눈' ? 'snow' : ''}.png" alt="${item.weatherCondition}" class="weather-icon">
+                                        <span>${item.currentTemperature}°C</span>
+                                    </p>`;
+                        }
+                        resultsSection.appendChild(li);
+                    });
+                    processTourData(data);  // 기존 맵 상태를 유지하면서 데이터를 처리합니다.
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
                 $('.loading').hide();
             });
     });
+
+
+
 
     document.addEventListener('DOMContentLoaded', function() {
         const tourlist = /*[[${tourlist}]]*/ [];

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -161,6 +162,7 @@ public class TourlistService {
 
     public List<TourlistMapDto> getTourlistByDistance(double radius) {
         List<Tourlist> tourlists = tourlistRepository.findAll();
+
         return tourlists.stream()
                 .map(this::convertToDto)
                 .filter(dto -> radius <= 0 || dto.getDistance() <= radius)
@@ -168,12 +170,18 @@ public class TourlistService {
                 .collect(Collectors.toList());
     }
 
-    public List<TourlistMapDto> searchTours(String category, String search, double radius) {
+    public List<TourlistMapDto> searchTours(String category, String search, double radius, String weather) {
         List<Tourlist> tourlists = tourlistRepository.searchTours(category, search);
+
+        String[] defaultWeatherConditions = {"맑음", "구름많음", "흐림", "흐리고 비", "눈"};
+        List<String> weatherConditions = weather == null || weather.isEmpty()
+                ? Arrays.asList(defaultWeatherConditions)
+                : Arrays.asList(weather.split(","));
 
         return tourlists.stream()
                 .map(this::convertToDto)
                 .filter(dto -> radius <= 0 || dto.getDistance() <= radius)
+                .filter(dto -> weatherConditions.contains(dto.getWeatherCondition()))
                 .sorted(Comparator.comparingDouble(TourlistMapDto::getDistance))
                 .collect(Collectors.toList());
     }

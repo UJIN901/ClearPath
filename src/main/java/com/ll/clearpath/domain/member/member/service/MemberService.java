@@ -86,4 +86,13 @@ public class MemberService {
 
         return uniqueNickname;
     }
+
+    public String joinString(String search, Long id) {
+        Member member = memberRepository.findById(id).get();
+
+        if(search.isBlank()){
+            return "" + member.getInterests();
+        }
+        return search + "," + member.getInterests();
+    }
 }

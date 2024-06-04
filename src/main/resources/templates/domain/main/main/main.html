@@ -7,7 +7,8 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,700" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <style>
         body, html {
             height: 100%;
@@ -91,6 +92,12 @@
             padding: 20px; /* 배경과 글자 사이의 간격 추가 */
             border-radius: 10px; /* 모서리 둥글게 */
         }
+        .weather-icon {
+            height: 1em;
+            width: 1em;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -133,7 +140,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="맑음" id="weatherClear">
                                 <label class="form-check-label" for="weatherClear">
-                                    <i class="fa fa-sun-o" aria-hidden="true"></i> 맑음
+                                    <img src="/icons/sunny.png" alt="맑음" class="weather-icon"> 맑음
                                 </label>
                             </div>
                         </div>
@@ -141,7 +148,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="구름많음" id="weatherCloudy">
                                 <label class="form-check-label" for="weatherCloudy">
-                                    <i class="fa fa-cloud" aria-hidden="true"></i> 구름많음
+                                    <img src="/icons/cloudy.png" alt="구름많음" class="weather-icon"> 구름많음
                                 </label>
                             </div>
                         </div>
@@ -149,7 +156,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="흐림" id="weatherOvercast">
                                 <label class="form-check-label" for="weatherOvercast">
-                                    <i class="fa fa-cloud" aria-hidden="true"></i> 흐림
+                                    <img src="/icons/overcast.png" alt="흐림" class="weather-icon"> 흐림
                                 </label>
                             </div>
                         </div>
@@ -157,7 +164,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="흐리고 비" id="weatherRainy">
                                 <label class="form-check-label" for="weatherRainy">
-                                    <i class="fa fa-umbrella" aria-hidden="true"></i> 흐리고 비
+                                    <img src="/icons/rain.png" alt="흐리고 비" class="weather-icon"> 흐리고 비
                                 </label>
                             </div>
                         </div>
@@ -165,7 +172,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="눈" id="weatherSnowy">
                                 <label class="form-check-label" for="weatherSnowy">
-                                    <i class="fa fa-snowflake-o" aria-hidden="true"></i> 눈
+                                    <img src="/icons/snow.png" alt="눈" class="weather-icon"> 눈
                                 </label>
                             </div>
                         </div>

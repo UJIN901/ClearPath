@@ -129,7 +129,9 @@ public class TourlistService {
                 tourlist.getLongitude(),
                 distance,
                 tourlist.getAddress(),
-                tags
+                tags,
+                tourlist.getCurrentTemperature(),
+                tourlist.getWeatherCondition()
         );
     }
 

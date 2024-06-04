@@ -19,4 +19,8 @@ public class TourlistMapDto {
     private String address;
 
     private String tag;
+
+    private double currentTemperature;
+
+    private String weatherCondition;
 }

@@ -29,8 +29,8 @@ public class TourlistService {
     private final KeywordRepository keywordRepository;
     private final KeywordListRepository keywordListRepository;
 
-    private static final double JEJU_CITY_HALL_LATITUDE = 33.499621;
-    private static final double JEJU_CITY_HALL_LONGITUDE = 126.531188;
+    private static final double JEJU_CULTURE_AND_ARTS_CENTER_LATITUDE = 33.5043089;
+    private static final double JEJU_CLUTURE_AND_ARTS_CENTER_LONGITUDE = 126.5353859;
 
     @Transactional
     public void save(TourlistRequestDto tourlistRequestDto) {
@@ -121,7 +121,7 @@ public class TourlistService {
                 .map(keywordList -> keywordList.getKeyword().getContent())
                 .collect(Collectors.joining(", "));
 
-        double distance = calculateDistance(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE, tourlist.getLatitude(), tourlist.getLongitude());
+        double distance = calculateDistance(JEJU_CULTURE_AND_ARTS_CENTER_LATITUDE, JEJU_CLUTURE_AND_ARTS_CENTER_LONGITUDE, tourlist.getLatitude(), tourlist.getLongitude());
 
         return new TourlistMapDto(
                 tourlist.getTitle(),

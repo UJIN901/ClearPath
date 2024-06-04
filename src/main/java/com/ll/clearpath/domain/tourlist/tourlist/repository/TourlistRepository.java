@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TourlistRepository extends JpaRepository<Tourlist, Long> {
@@ -22,4 +23,6 @@ public interface TourlistRepository extends JpaRepository<Tourlist, Long> {
             @Param("search") String search);
 
     List<Tourlist> findTop1By();
+
+    Optional<Tourlist> findByTitle(String title);
 }

@@ -1,9 +1,6 @@
 package com.ll.clearpath.domain.tourlist.tourlist.service;
 
-import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistDetailDto;
-import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistMapDto;
-import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistRequestDto;
-import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistResponseDto;
+import com.ll.clearpath.domain.tourlist.tourlist.dto.*;
 import com.ll.clearpath.domain.tourlist.tourlist.entity.Keyword;
 import com.ll.clearpath.domain.tourlist.tourlist.entity.KeywordList;
 import com.ll.clearpath.domain.tourlist.tourlist.entity.Tourlist;
@@ -184,5 +181,24 @@ public class TourlistService {
                 .filter(dto -> weatherConditions.contains(dto.getWeatherCondition()))
                 .sorted(Comparator.comparingDouble(TourlistMapDto::getDistance))
                 .collect(Collectors.toList());
+    }
+
+    public TourlistModalDto getDetailsByTitle(String title) {
+        return tourlistRepository.findByTitle(title)
+                .map(tour -> {
+                    String tags = tour.getKeywordLists().stream()
+                            .map(keywordList -> keywordList.getKeyword().getContent())
+                            .collect(Collectors.joining(", "));
+                    return new TourlistModalDto(
+                            tour.getTitle(),
+                            tour.getAddress(),
+                            tags,
+                            tour.getIntroduction(),
+                            tour.getImgpath(),
+                            tour.getCurrentTemperature(),
+                            tour.getWeatherCondition()
+                    );
+                })
+                .orElse(null);
     }
 }

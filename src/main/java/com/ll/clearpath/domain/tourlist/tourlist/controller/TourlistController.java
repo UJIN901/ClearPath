@@ -1,6 +1,7 @@
 package com.ll.clearpath.domain.tourlist.tourlist.controller;
 
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistMapDto;
+import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistModalDto;
 import com.ll.clearpath.domain.tourlist.tourlist.dto.TourlistRequestDto;
 import com.ll.clearpath.domain.tourlist.tourlist.service.TourlistService;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +60,16 @@ public class TourlistController {
         }
 
         return ResponseEntity.ok(result); // 200 OK 상태 코드와 함께 결과 반환
+    }
+
+    @GetMapping("/details")
+    @ResponseBody
+    public ResponseEntity<TourlistModalDto> getDetailsTourData(@RequestParam(value = "title") String title){
+        TourlistModalDto tourDetails = tourlistService.getDetailsByTitle(title);
+        if (tourDetails != null) {
+            return ResponseEntity.ok(tourDetails);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

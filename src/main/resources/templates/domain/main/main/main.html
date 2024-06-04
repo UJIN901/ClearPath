@@ -104,6 +104,67 @@
             vertical-align: middle;
             margin-right: 5px;
         }
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-title {
+            color: #007bff;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .img-fluid {
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        #modalTitle {
+            font-size: 1.5rem;
+        }
+
+        #modalAddress {
+            font-size: 1.1rem;
+        }
+
+        #modalTags {
+            font-size: 0.9rem;
+            background-color: #17a2b8;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.2rem;
+        }
+
+        #modalIntroduction {
+            font-size: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #ccc; /* 테두리 추가 */
+            padding: 10px; /* 패딩 추가 */
+            border-radius: 5px; /* 모서리 둥글게 */
+            background-color: #f8f9fa; /* 배경색 추가 */
+        }
+
+        #modalWeather {
+            font-size: 1.2rem;
+            color: #007bff;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-weather-icon {
+            height: 1.8em;
+            width: 1.8em;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .button-spacing {
+            margin-right: 4px;
+        }
+
     </style>
 </head>
 <body>
@@ -196,6 +257,8 @@
                     <h5>
                         <span th:text="${tour.title}"></span>
                         <button class="btn btn-sm btn-outline-primary move-button" th:onclick="'moveToLocation(' + ${tour.latitude} + ',' + ${tour.longitude} + ')'">이동</button>
+                        <button class="btn btn-sm btn-outline-info" th:onclick="showDetailsModal([[${tour.title}]])">상세</button>
+
                     </h5>
                 </div>
                 <div>
@@ -216,10 +279,39 @@
                                  alt="weather icon" class="weather-icons">
                         </span>
                         <span th:if="${tour.currentTemperature != 0.0}" th:text="${tour.currentTemperature} + '°C'"></span>
+
                     </p>
                 </div>
             </li>
         </ul>
+    </div>
+</div>
+
+<!-- Add this section inside the <body> tag -->
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">상세설명</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img id="modalImage" src="" alt="Tour Image" class="img-fluid" style="border-radius: 10px;">
+                    </div>
+                    <div class="col-md-6">
+                        <h5 id="modalTitle" class="font-weight-bold my-3"></h5>
+                        <p id="modalAddress" class="text-muted"></p>
+                        <p id="modalTags" class="badge badge-info"></p>
+                        <p id="modalIntroduction" class="mt-3"></p>
+                        <p id="modalWeather" class="text-primary font-italic"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -379,7 +471,7 @@
                     data.forEach(item => {
                         const li = document.createElement('li');
                         li.classList.add('list-group-item');
-                        li.innerHTML = `<div><h5>${item.title} <button class="btn btn-sm btn-outline-primary move-button" onclick="moveToLocation(${item.latitude}, ${item.longitude})">이동</button></h5></div><p><span class="distance">${item.distance.toFixed(1)} km</span><span class="address">${item.address}</span></p><p class="tags">${item.tag.split(',').map(tag => `<span class="tag">${tag}</span>`).join('')}</p>`;
+                        li.innerHTML = `<div><h5>${item.title} <button class="btn btn-sm btn-outline-primary move-button button-spacing" onclick="moveToLocation(${item.latitude}, ${item.longitude})">이동</button><button class="btn btn-sm btn-outline-info" onclick="showDetailsModal('${item.title}')">상세</button></h5></div><p><span class="distance">${item.distance.toFixed(1)} km</span><span class="address">${item.address}</span></p><p class="tags">${item.tag.split(',').map(tag => `<span class="tag">${tag}</span>`).join('')}</p>`;
                         if(item.weatherCondition !== '알 수 없음') {
                             li.innerHTML += `<p class="weather-info">
                                         <img src="/icons/${item.weatherCondition == '맑음' ? 'sunny' :
@@ -401,6 +493,59 @@
             });
     });
 
+    function showDetailsModal(title) {
+        $('.loading').show();
+        fetch(`/api/tourlist/details?title=${encodeURIComponent(title)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                $('.loading').hide();
+                console.log(data);  // 응답 데이터를 콘솔에 출력하여 구조 확인
+                if (data) {
+                    // HTML 요소가 존재하는지 확인 후 데이터 설정
+                    const modalTitle = document.getElementById('modalTitle');
+                    const modalAddress = document.getElementById('modalAddress');
+                    const modalTags = document.getElementById('modalTags');
+                    const modalIntroduction = document.getElementById('modalIntroduction');
+                    const modalImage = document.getElementById('modalImage');
+                    const modalWeather = document.getElementById('modalWeather');
+                    const modalTemperature = document.getElementById('modalTemperature');
+
+                    if (modalTitle) modalTitle.textContent = data.title || 'N/A';
+                    if (modalAddress) modalAddress.textContent = data.address || 'N/A';
+                    if (modalTags) modalTags.textContent = data.tag || 'N/A';
+                    if (modalIntroduction) modalIntroduction.textContent = data.introduction || 'N/A';
+                    if (modalImage) modalImage.src = data.imgpath || '';
+                    if (modalWeather) {
+                        const weatherIconMap = {
+                            '맑음': 'sunny',
+                            '구름많음': 'cloudy',
+                            '흐림': 'overcast',
+                            '흐리고 비': 'rain',
+                            '눈': 'snow'
+                        };
+                        const weatherIcon = weatherIconMap[data.weatherCondition] || '';
+                        modalWeather.innerHTML = weatherIcon
+                            ? `<img src="/icons/${weatherIcon}.png" alt="${data.weatherCondition}" class="modal-weather-icon"> ${data.weatherCondition}`
+                            : `${data.weatherCondition}`;
+                    }
+                    if (modalTemperature) modalTemperature.textContent = `Temperature: ${data.currentTemperature || 'N/A'}°C`;
+
+                    $('#detailsModal').modal('show');
+                } else {
+                    alert('Details not found');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                $('.loading').hide();
+                alert('An error occurred while fetching details');
+            });
+    }
 
 
 

@@ -7,8 +7,10 @@ import com.ll.clearpath.domain.tourlist.tourlist.entity.Tourlist;
 import com.ll.clearpath.domain.tourlist.tourlist.repository.KeywordListRepository;
 import com.ll.clearpath.domain.tourlist.tourlist.repository.KeywordRepository;
 import com.ll.clearpath.domain.tourlist.tourlist.repository.TourlistRepository;
+import com.ll.clearpath.domain.tourlist.tourlist.specification.TourlistSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -27,8 +29,8 @@ public class TourlistService {
     private final KeywordRepository keywordRepository;
     private final KeywordListRepository keywordListRepository;
 
-    private static final double JEJU_CITY_HALL_LATITUDE = 33.499621;
-    private static final double JEJU_CITY_HALL_LONGITUDE = 126.531188;
+    private static final double JEJU_CULTURE_AND_ARTS_CENTER_LATITUDE = 33.5043089;
+    private static final double JEJU_CLUTURE_AND_ARTS_CENTER_LONGITUDE = 126.5353859;
 
     @Transactional
     public void save(TourlistRequestDto tourlistRequestDto) {
@@ -119,7 +121,7 @@ public class TourlistService {
                 .map(keywordList -> keywordList.getKeyword().getContent())
                 .collect(Collectors.joining(", "));
 
-        double distance = calculateDistance(JEJU_CITY_HALL_LATITUDE, JEJU_CITY_HALL_LONGITUDE, tourlist.getLatitude(), tourlist.getLongitude());
+        double distance = calculateDistance(JEJU_CULTURE_AND_ARTS_CENTER_LATITUDE, JEJU_CLUTURE_AND_ARTS_CENTER_LONGITUDE, tourlist.getLatitude(), tourlist.getLongitude());
 
         return new TourlistMapDto(
                 tourlist.getTitle(),
@@ -168,7 +170,10 @@ public class TourlistService {
     }
 
     public List<TourlistMapDto> searchTours(String category, String search, double radius, String weather) {
-        List<Tourlist> tourlists = tourlistRepository.searchTours(category, search);
+        List<String> searches = Arrays.asList(search.split(","));
+
+        Specification<Tourlist> specification = TourlistSpecifications.searchByCategoryAndKeywords(category, searches);
+        List<Tourlist> tourlists = tourlistRepository.findAll(specification);
 
         String[] defaultWeatherConditions = {"맑음", "구름많음", "흐림", "흐리고 비", "눈"};
         List<String> weatherConditions = weather == null || weather.isEmpty()

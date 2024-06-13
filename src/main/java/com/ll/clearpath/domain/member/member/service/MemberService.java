@@ -25,6 +25,7 @@ public class MemberService {
                 .password(passwordEncoder.encode(memberRegisterDto.getPassword()))
                 .nickname(memberRegisterDto.getNickname())
                 .providerId(null)
+                .interests(memberRegisterDto.getInterests())
                 .build();
 
         memberRepository.save(member);
@@ -46,6 +47,7 @@ public class MemberService {
                 .password(null)
                 .nickname(uniqueNickname)
                 .providerId(providerId)
+                .interests(null)
                 .build();
 
         memberRepository.save(member);
@@ -83,5 +85,14 @@ public class MemberService {
         }
 
         return uniqueNickname;
+    }
+
+    public String joinString(String search, Long id) {
+        Member member = memberRepository.findById(id).get();
+
+        if(search.isBlank()){
+            return "" + member.getInterests();
+        }
+        return search + "," + member.getInterests();
     }
 }

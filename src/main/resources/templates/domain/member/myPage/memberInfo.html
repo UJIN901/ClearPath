@@ -31,6 +31,11 @@
                 <input type="text" id="nicknameDisplay" th:value="${memberInfoDto.nickname}" readonly>
                 <i class="fas fa-pencil-alt" title="수정 가능" style="cursor:pointer;" onclick="showNicknameEdit()"></i>
             </p>
+            <p class="card-text">
+                <label for="interests">관심 키워드:</label>
+                <input type="text" id="interests" th:value="${memberInfoDto.interests}" readonly>
+                <i class="fas fa-pencil-alt" title="수정 가능" style="cursor:pointer;" onclick="showInterestsEdit()"></i>
+            </p>
             <div class="card-text row">
                 <div th:if="${not isSocialLogin}" class="col-md-auto">
                     <button onclick="showPasswordEdit()" class="btn btn-secondary">비밀번호 수정</button>
@@ -55,6 +60,10 @@
 <script>
     function showNicknameEdit() {
         window.location.href = '/member/my-page/update';
+    }
+
+    function showInterestsEdit() {
+        window.location.href = '/member/my-page/update-interests';
     }
     function showPasswordEdit() {
         window.location.href = '/member/my-page/update-password';

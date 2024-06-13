@@ -26,7 +26,6 @@ public class MainController {
 
         double defaultRadius = 3.0;
         List<TourlistMapDto> tourlist = tourlistService.getTourlistByDistance(defaultRadius);
-//        List<TourlistMapDto> tourlist = tourlistService.getAllTourlistForMap();
         model.addAttribute("tourlist", tourlist);
         return "domain/main/main/main";
     }

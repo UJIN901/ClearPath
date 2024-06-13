@@ -443,12 +443,12 @@
             });
         });
 
-        // 플래그 변수를 확인하여 이미 alert 창을 보여줬는지 확인합니다.
+        // 플래그 변수 확인(이미 alert창 보여줬는지)
         if (showedRainyAlert) {
-            return; // 이미 보여줬다면 함수 실행 종료
+            return;
         }
 
-        // 제주향교의 정보를 찾습니다.
+        // 기준 위치:제주문예회관 찾기
         const jejuCultureAndArtsCenter = tourlist.find(tour => tour.title === '제주문예회관');
 
         if (jejuCultureAndArtsCenter && jejuCultureAndArtsCenter.weatherCondition === '흐리고 비') {
@@ -456,7 +456,7 @@
                 document.getElementById('search').value = '실내';
                 document.getElementById('searchForm').dispatchEvent(new Event('submit'));
             }
-            showedRainyAlert = true; // alert 창을 보여줬으므로 플래그 변수를 true로 설정
+            showedRainyAlert = true; // 플래그 변수값 변경
         }
     }
 

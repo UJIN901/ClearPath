@@ -57,9 +57,9 @@ public class TourlistController {
             @RequestParam(value = "weather") String weather,
             @RequestParam(value = "interest") boolean interest,
             @AuthenticationPrincipal CustomUserDetails user) {
+        
         String joinSearch = interest ? memberService.joinString(search, user.getId()) : search;
 
-        log.debug("search : " + joinSearch);
         double radiusValue = "all".equalsIgnoreCase(radius) ? 0 : Double.parseDouble(radius);
         List<TourlistMapDto> result = tourlistService.searchTours(category, joinSearch, radiusValue, weather);
 
